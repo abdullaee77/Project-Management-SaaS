@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    container_name: taskly_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: taskly_user
+      POSTGRES_PASSWORD: taskly_password
+      POSTGRES_DB: taskly_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - taskly_data:/var/lib/postgresql/data
+
+volumes:
+  taskly_data:

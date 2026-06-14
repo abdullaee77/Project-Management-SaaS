@@ -34,3 +34,137 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+```
+taskly
+├─ AGENTS.md
+├─ app
+│  ├─ (auth)
+│  │  ├─ layout.tsx
+│  │  ├─ login
+│  │  │  └─ page.tsx
+│  │  └─ signup
+│  │     └─ page.tsx
+│  ├─ (dashboard)
+│  ├─ api
+│  │  ├─ auth
+│  │  │  ├─ forgot-password
+│  │  │  │  └─ route.ts
+│  │  │  ├─ reset-password
+│  │  │  │  └─ route.ts
+│  │  │  ├─ signup
+│  │  │  │  └─ route.ts
+│  │  │  ├─ verify-email
+│  │  │  │  └─ route.ts
+│  │  │  └─ [...nextauth]
+│  │  │     └─ route.ts
+│  │  └─ test-db
+│  │     └─ route.ts
+│  ├─ favicon.ico
+│  ├─ globals.css
+│  ├─ layout.tsx
+│  └─ page.tsx
+├─ CLAUDE.md
+├─ components
+│  └─ shared
+│     └─ SessionProvider.tsx
+├─ docker-compose.yml
+├─ emails
+├─ eslint.config.mjs
+├─ hooks
+├─ lib
+│  ├─ auth.ts
+│  └─ db.ts
+├─ next.config.ts
+├─ package-lock.json
+├─ package.json
+├─ postcss.config.mjs
+├─ proxy.ts
+├─ public
+│  ├─ file.svg
+│  ├─ globe.svg
+│  ├─ next.svg
+│  ├─ vercel.svg
+│  └─ window.svg
+├─ README.md
+├─ scripts
+│  └─ schema.sql
+├─ tsconfig.json
+└─ types
+   ├─ index.ts
+   └─ next-auth.d.ts
+
+```
+```
+taskly
+├─ AGENTS.md
+├─ app
+│  ├─ (auth)
+│  │  ├─ forgot-password
+│  │  │  └─ page.tsx
+│  │  ├─ layout.tsx
+│  │  ├─ login
+│  │  │  └─ page.tsx
+│  │  ├─ reset-password
+│  │  │  └─ page.tsx
+│  │  ├─ signup
+│  │  │  └─ page.tsx
+│  │  └─ verify-email
+│  │     └─ page.tsx
+│  ├─ (dashboard)
+│  │  └─ dashboard
+│  │     └─ page.tsx
+│  ├─ api
+│  │  ├─ auth
+│  │  │  ├─ forgot-password
+│  │  │  │  └─ route.ts
+│  │  │  ├─ reset-password
+│  │  │  │  └─ route.ts
+│  │  │  ├─ signup
+│  │  │  │  └─ route.ts
+│  │  │  ├─ verify-email
+│  │  │  │  └─ route.ts
+│  │  │  └─ [...nextauth]
+│  │  │     └─ route.ts
+│  │  └─ test-db
+│  │     └─ route.ts
+│  ├─ favicon.ico
+│  ├─ globals.css
+│  ├─ layout.tsx
+│  └─ page.tsx
+├─ CLAUDE.md
+├─ components
+│  └─ shared
+│     └─ SessionProvider.tsx
+├─ docker-compose.yml
+├─ emails
+│  ├─ ResetPassword.tsx
+│  ├─ VerifyEmail.tsx
+│  └─ WelcomeEmail.tsx
+├─ eslint.config.mjs
+├─ hooks
+├─ lib
+│  ├─ auth.ts
+│  ├─ db.ts
+│  ├─ resend.ts
+│  └─ utils.ts
+├─ next.config.ts
+├─ package-lock.json
+├─ package.json
+├─ postcss.config.mjs
+├─ proxy.ts
+├─ public
+│  ├─ file.svg
+│  ├─ globe.svg
+│  ├─ next.svg
+│  ├─ vercel.svg
+│  └─ window.svg
+├─ README.md
+├─ scripts
+│  └─ schema.sql
+├─ tsconfig.json
+└─ types
+   ├─ index.ts
+   └─ next-auth.d.ts
+
+```
