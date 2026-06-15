@@ -16,7 +16,7 @@ export default function WorkspaceSidebar({ workspace }: WorkspaceSidebarProps) {
   ]
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 min-h-screen p-4 flex flex-col">
+    <aside className="w-64 bg-gray-300 border-r border-gray-200 min-h-screen p-4 flex flex-col">
       <div className="flex items-center gap-2 mb-6 px-2">
         <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
           <span className="text-white font-bold text-sm">

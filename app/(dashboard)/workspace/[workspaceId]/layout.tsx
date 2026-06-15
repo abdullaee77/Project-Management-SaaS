@@ -32,7 +32,7 @@ export default async function WorkspaceLayout({
   const workspace = result.rows[0]
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-200 flex">
       <WorkspaceSidebar workspace={workspace} />
       <main className="flex-1 p-8">{children}</main>
     </div>

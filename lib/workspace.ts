@@ -21,3 +21,7 @@ export async function getMemberRole(
 export function canManageWorkspace(role: WorkspaceRole | null): boolean {
   return role === "owner" || role === "admin"
 }
+// Owner, Admin, Member can create projects — Viewers cannot
+export function canCreateProject(role: WorkspaceRole | null): boolean {
+  return role === "owner" || role === "admin" || role === "member"
+}

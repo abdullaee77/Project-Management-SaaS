@@ -31,7 +31,7 @@ export default async function DashboardPage() {
   // No workspaces yet → show create workspace form
   if (workspaces.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gray-300 p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900">
@@ -49,7 +49,7 @@ export default async function DashboardPage() {
 
   // Has workspaces → show list
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-300 p-8">
       <div className="max-w-4xl mx-auto">
         
         <div className="flex items-center justify-between mb-8">
@@ -66,7 +66,7 @@ export default async function DashboardPage() {
             <Link
               key={ws.id}
               href={`/workspace/${ws.id}`}
-              className="bg-white border border-gray-200 rounded-xl p-6 hover:border-blue-300 hover:shadow-md transition-all"
+              className="bg-gray-200 border border-gray-200 rounded-xl p-6 hover:border-blue-300 hover:shadow-md transition-all"
             >
               <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mb-3">
                 <span className="text-white font-bold text-lg">

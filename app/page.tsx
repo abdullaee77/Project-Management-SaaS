@@ -2,15 +2,15 @@ import Link from "next/link"
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-gray-300 flex flex-col">
 
       {/* Navbar */}
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-gray-100">
+      <nav className="flex items-center justify-between px-8 py-5 border-b border-gray-300">
         <h1 className="text-xl font-bold text-gray-900">Taskly</h1>
         <div className="flex items-center gap-4">
           <Link
             href="/login"
-            className="text-sm text-gray-600 hover:text-gray-900 font-medium"
+            className="text-sm text-gray-600 hover:text-gray-900 font-medium "
           >
             Sign in
           </Link>
@@ -42,7 +42,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/login"
-              className="text-gray-600 px-8 py-3 rounded-lg font-medium text-base border border-gray-200 hover:bg-gray-50 transition-colors"
+              className="hover:text-gray-800 text-gray-600 px-8 py-3 rounded-lg font-medium text-base border border-gray-200 hover:bg-gray-200 transition-colors"
             >
               Sign in
             </Link>
@@ -51,8 +51,8 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="text-center py-6 text-sm text-gray-400 border-t border-gray-100">
-        © 2024 Taskly. Built with Next.js + PostgreSQL.
+      <footer className="text-center py-6 text-sm text-gray-700 border-t border-gray-300">
+        © 2026 Taskly.
       </footer>
 
     </div>
