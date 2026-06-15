@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from "react"
+import FilterBar from "./FilterBar"
 import {
   DndContext,
   DragEndEvent,
@@ -56,6 +57,9 @@ export default function KanbanBoard({
   const [tasks, setTasks] = useState<Task[]>(initialTasks)
   const [activeTask, setActiveTask] = useState<Task | null>(null)
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
+  const [search, setSearch] = useState("")
+const [priorityFilter, setPriorityFilter] = useState("")
+const [assigneeFilter, setAssigneeFilter] = useState("")
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -63,8 +67,18 @@ export default function KanbanBoard({
     })
   )
 
-  const getColumnTasks = (status: string) =>
-    tasks.filter((t) => t.status === status).sort((a, b) => a.position - b.position)
+const getColumnTasks = (status: string) => {
+  return tasks
+    .filter((t) => t.status === status)
+    .filter((t) => {
+      if (search && !t.title.toLowerCase().includes(search.toLowerCase())) return false
+      if (priorityFilter && t.priority !== priorityFilter) return false
+      if (assigneeFilter === "unassigned" && t.assignee_id) return false
+      if (assigneeFilter && assigneeFilter !== "unassigned" && t.assignee_id !== assigneeFilter) return false
+      return true
+    })
+    .sort((a, b) => a.position - b.position)
+}
 
   const handleDragStart = (event: DragStartEvent) => {
     const task = tasks.find((t) => t.id === event.active.id)
@@ -129,11 +143,27 @@ export default function KanbanBoard({
   const handleTaskDelete = (taskId: string) => {
     setTasks((prev) => prev.filter((t) => t.id !== taskId))
   }
+  const handleClearFilters = () => {
+  setSearch("")
+  setPriorityFilter("")
+  setAssigneeFilter("")
+}
 
   const selectedTask = tasks.find((t) => t.id === selectedTaskId) || null
 
-  return (
+ return (
     <>
+      <FilterBar
+        members={members}
+        search={search}
+        setSearch={setSearch}
+        priority={priorityFilter}
+        setPriority={setPriorityFilter}
+        assignee={assigneeFilter}
+        setAssignee={setAssigneeFilter}
+        onClear={handleClearFilters}
+      />
+
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
