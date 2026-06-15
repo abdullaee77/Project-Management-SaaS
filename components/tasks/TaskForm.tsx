@@ -12,6 +12,7 @@ interface Member {
 interface Task {
   id: string
   title: string
+  description: string | null
   status: string
   priority: string
   position: number
@@ -71,6 +72,7 @@ export default function TaskForm({
       onCreated({
         id: data.task.id,
         title: data.task.title,
+        description: null,
         status: data.task.status,
         priority: data.task.priority,
         position: data.task.position,

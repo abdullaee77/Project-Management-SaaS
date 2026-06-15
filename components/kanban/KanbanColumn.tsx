@@ -19,6 +19,7 @@ interface KanbanColumnProps {
   label: string
   tasks: Task[]
   canEdit: boolean
+  onOpenTask: (id: string) => void
   children?: React.ReactNode
 }
 
@@ -29,7 +30,7 @@ const STATUS_COLORS: Record<string, string> = {
   done: "#10b981",
 }
 
-export default function KanbanColumn({ id, label, tasks, canEdit, children }: KanbanColumnProps) {
+export default function KanbanColumn({ id, label, tasks, canEdit, onOpenTask, children }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id,
     data: { isColumn: true },
@@ -51,7 +52,7 @@ export default function KanbanColumn({ id, label, tasks, canEdit, children }: Ka
       >
         <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
           {tasks.map((task) => (
-            <KanbanCard key={task.id} task={task} canEdit={canEdit} />
+            <KanbanCard key={task.id} task={task} canEdit={canEdit} onOpen={onOpenTask} />
           ))}
         </SortableContext>
 

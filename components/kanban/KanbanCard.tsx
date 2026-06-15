@@ -24,10 +24,12 @@ export default function KanbanCard({
   task,
   dragging,
   canEdit = true,
+  onOpen,
 }: {
   task: Task
   dragging?: boolean
   canEdit?: boolean
+  onOpen?: (id: string) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
@@ -47,8 +49,9 @@ export default function KanbanCard({
       ref={setNodeRef}
       style={style}
       {...dragProps}
+      onClick={() => onOpen?.(task.id)}
       className={`bg-white rounded-lg border border-gray-200 p-3 hover:shadow-md transition-shadow ${
-        canEdit ? "cursor-grab active:cursor-grabbing" : ""
+        canEdit ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
       } ${dragging ? "shadow-lg rotate-2" : ""}`}
     >
       <p className="text-sm font-medium text-gray-900 mb-2">{task.title}</p>

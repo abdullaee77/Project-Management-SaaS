@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { auth } from "@/lib/auth"
 import { getMemberRole, canCreateProject } from "@/lib/workspace"
+import { logTaskActivity } from "@/lib/activity"
+
+const PRIORITY_LABELS: Record<string, string> = {
+  low: "Low", medium: "Medium", high: "High", urgent: "Urgent",
+}
+const STATUS_LABELS: Record<string, string> = {
+  todo: "To Do", in_progress: "In Progress", in_review: "In Review", done: "Done",
+}
 
 export async function PATCH(
   req: NextRequest,
@@ -20,9 +28,9 @@ export async function PATCH(
     if (taskResult.rows.length === 0) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 })
     }
-    const task = taskResult.rows[0]
+    const oldTask = taskResult.rows[0]
 
-    const myRole = await getMemberRole(task.workspace_id, session.user.id)
+    const myRole = await getMemberRole(oldTask.workspace_id, session.user.id)
     if (!canCreateProject(myRole)) {
       return NextResponse.json({ error: "You don't have permission to edit this task" }, { status: 403 })
     }
@@ -47,6 +55,57 @@ export async function PATCH(
     values.push(taskId)
 
     await db.query(`UPDATE tasks SET ${fields.join(", ")} WHERE id = $${i}`, values)
+
+    // ===== Log activity for meaningful changes =====
+    const userId = session.user.id
+
+    if (body.title !== undefined && body.title.trim() !== oldTask.title) {
+      await logTaskActivity(taskId, userId, "renamed task", oldTask.title, body.title.trim())
+    }
+
+    if (body.status !== undefined && body.status !== oldTask.status) {
+      await logTaskActivity(
+        taskId, userId, "moved task",
+        STATUS_LABELS[oldTask.status] || oldTask.status,
+        STATUS_LABELS[body.status] || body.status
+      )
+    }
+
+    if (body.priority !== undefined && body.priority !== oldTask.priority) {
+      await logTaskActivity(
+        taskId, userId, "changed priority",
+        PRIORITY_LABELS[oldTask.priority] || oldTask.priority,
+        PRIORITY_LABELS[body.priority] || body.priority
+      )
+    }
+
+    if (body.dueDate !== undefined) {
+      const oldDate = oldTask.due_date ? new Date(oldTask.due_date).toLocaleDateString() : null
+      const newDate = body.dueDate ? new Date(body.dueDate).toLocaleDateString() : null
+      if (oldDate !== newDate) {
+        await logTaskActivity(taskId, userId, "changed due date", oldDate, newDate)
+      }
+    }
+
+    if (body.assigneeId !== undefined && body.assigneeId !== oldTask.assignee_id) {
+      let oldName: string | null = "Unassigned"
+      let newName: string | null = "Unassigned"
+
+      if (oldTask.assignee_id) {
+        const r = await db.query(`SELECT name FROM users WHERE id = $1`, [oldTask.assignee_id])
+        oldName = r.rows[0]?.name || "Unassigned"
+      }
+      if (body.assigneeId) {
+        const r = await db.query(`SELECT name FROM users WHERE id = $1`, [body.assigneeId])
+        newName = r.rows[0]?.name || "Unassigned"
+      }
+
+      await logTaskActivity(taskId, userId, "changed assignee", oldName, newName)
+    }
+
+    if (body.description !== undefined && (body.description?.trim() || null) !== oldTask.description) {
+      await logTaskActivity(taskId, userId, "updated description", null, null)
+    }
 
     return NextResponse.json({ message: "Task updated" }, { status: 200 })
 

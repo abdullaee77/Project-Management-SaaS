@@ -14,6 +14,7 @@ import {
 import KanbanColumn from "./KanbanColumn"
 import KanbanCard from "./KanbanCard"
 import TaskForm from "@/components/tasks/TaskForm"
+import TaskModal from "@/components/tasks/TaskModal"
 
 const COLUMNS = [
   { id: "todo", label: "To Do" },
@@ -25,6 +26,7 @@ const COLUMNS = [
 interface Task {
   id: string
   title: string
+  description: string | null
   status: string
   priority: string
   position: number
@@ -53,6 +55,7 @@ export default function KanbanBoard({
 }) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks)
   const [activeTask, setActiveTask] = useState<Task | null>(null)
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -73,19 +76,17 @@ export default function KanbanBoard({
     setActiveTask(null)
     if (!over) return
 
-    const activeTask = tasks.find((t) => t.id === active.id)
-    if (!activeTask) return
+    const draggedTask = tasks.find((t) => t.id === active.id)
+    if (!draggedTask) return
 
     const isOverColumn = over.data.current?.isColumn === true
     const overTask = isOverColumn ? null : tasks.find((t) => t.id === over.id)
-    const newStatus = isOverColumn ? (over.id as string) : (overTask?.status ?? activeTask.status)
+    const newStatus = isOverColumn ? (over.id as string) : (overTask?.status ?? draggedTask.status)
 
-    // Dropped on itself with no status change — nothing to do
-    if (activeTask.status === newStatus && activeTask.id === over.id) return
+    if (draggedTask.status === newStatus && draggedTask.id === over.id) return
 
-    // Remove the dragged task from the list, then reinsert it at the new spot
-    let updated = tasks.filter((t) => t.id !== activeTask.id)
-    const moved = { ...activeTask, status: newStatus }
+    let updated = tasks.filter((t) => t.id !== draggedTask.id)
+    const moved = { ...draggedTask, status: newStatus }
 
     if (overTask) {
       const overIndex = updated.findIndex((t) => t.id === overTask.id)
@@ -94,7 +95,6 @@ export default function KanbanBoard({
       updated.push(moved)
     }
 
-    // Recalculate position (0, 1, 2...) for every column
     const changedTasks: { id: string; status: string; position: number }[] = []
     COLUMNS.forEach((col) => {
       const colTasks = updated.filter((t) => t.status === col.id)
@@ -122,37 +122,61 @@ export default function KanbanBoard({
     setTasks((prev) => [...prev, newTask])
   }
 
-  return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCorners}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="flex gap-4 overflow-x-auto pb-4">
-        {COLUMNS.map((col) => (
-          <KanbanColumn
-            key={col.id}
-            id={col.id}
-            label={col.label}
-            tasks={getColumnTasks(col.id)}
-            canEdit={canEdit}
-          >
-            {canEdit && (
-              <TaskForm
-                projectId={projectId}
-                status={col.id}
-                members={members}
-                onCreated={handleTaskCreated}
-              />
-            )}
-          </KanbanColumn>
-        ))}
-      </div>
+  const handleTaskUpdate = (taskId: string, fields: Partial<Task>) => {
+    setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, ...fields } : t)))
+  }
 
-      <DragOverlay>
-        {activeTask ? <KanbanCard task={activeTask} dragging /> : null}
-      </DragOverlay>
-    </DndContext>
+  const handleTaskDelete = (taskId: string) => {
+    setTasks((prev) => prev.filter((t) => t.id !== taskId))
+  }
+
+  const selectedTask = tasks.find((t) => t.id === selectedTaskId) || null
+
+  return (
+    <>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="flex gap-4 overflow-x-auto pb-4">
+          {COLUMNS.map((col) => (
+            <KanbanColumn
+              key={col.id}
+              id={col.id}
+              label={col.label}
+              tasks={getColumnTasks(col.id)}
+              canEdit={canEdit}
+              onOpenTask={setSelectedTaskId}
+            >
+              {canEdit && (
+                <TaskForm
+                  projectId={projectId}
+                  status={col.id}
+                  members={members}
+                  onCreated={handleTaskCreated}
+                />
+              )}
+            </KanbanColumn>
+          ))}
+        </div>
+
+        <DragOverlay>
+          {activeTask ? <KanbanCard task={activeTask} dragging /> : null}
+        </DragOverlay>
+      </DndContext>
+
+      {selectedTask && (
+        <TaskModal
+          task={selectedTask}
+          members={members}
+          canEdit={canEdit}
+          onClose={() => setSelectedTaskId(null)}
+          onUpdate={handleTaskUpdate}
+          onDelete={handleTaskDelete}
+        />
+      )}
+    </>
   )
 }
