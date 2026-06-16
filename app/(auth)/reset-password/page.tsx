@@ -1,10 +1,11 @@
 'use client'
 
+import { Suspense } from "react"
 import { useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const token = searchParams.get("token")
@@ -156,5 +157,17 @@ export default function ResetPasswordPage() {
       </p>
 
     </div>
+  )
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 p-8 flex items-center justify-center">
+        <span className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <ResetPasswordForm />
+    </Suspense>
   )
 }

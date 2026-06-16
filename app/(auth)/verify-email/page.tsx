@@ -1,10 +1,11 @@
 'use client'
 
+import { Suspense } from "react"
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const searchParams = useSearchParams()
   const token = searchParams.get("token")
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading")
@@ -88,5 +89,17 @@ export default function VerifyEmailPage() {
       )}
 
     </div>
+  )
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 p-8 flex items-center justify-center">
+        <span className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <VerifyEmailContent />
+    </Suspense>
   )
 }
