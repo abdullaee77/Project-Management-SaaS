@@ -1,15 +1,16 @@
 'use client'
 
+import { Suspense } from "react"
 import { useState } from "react"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -33,16 +34,16 @@ const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
         redirect: false,
       })
 
-     if (result?.error) {
-  if (result.error === "CredentialsSignin") {
-    setError("Invalid email or password. If you just signed up, please verify your email first.")
-  } else {
-    setError(result.error)
-  }
-  return
-}
+      if (result?.error) {
+        if (result.error === "CredentialsSignin") {
+          setError("Invalid email or password. If you just signed up, please verify your email first.")
+        } else {
+          setError(result.error)
+        }
+        return
+      }
 
-router.push(callbackUrl)
+      router.push(callbackUrl)
       router.refresh()
 
     } catch (err) {
@@ -52,28 +53,25 @@ router.push(callbackUrl)
     }
   }
 
-const handleGoogleLogin = async () => {
-  await signIn("google", { callbackUrl })
-}
+  const handleGoogleLogin = async () => {
+    await signIn("google", { callbackUrl })
+  }
+
   return (
     <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
 
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Welcome back</h1>
         <p className="text-gray-500 mt-2">Sign in to your account</p>
       </div>
 
-      {/* Error */}
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
           {error}
         </div>
       )}
 
-      {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Email address
@@ -94,8 +92,8 @@ const handleGoogleLogin = async () => {
             <label className="block text-sm font-medium text-gray-700">
               Password
             </label>
-            <Link 
-              href="/forgot-password" 
+            <Link
+              href="/forgot-password"
               className="text-xs text-blue-600 hover:underline"
             >
               Forgot password?
@@ -122,17 +120,14 @@ const handleGoogleLogin = async () => {
           )}
           {loading ? "Signing in..." : "Sign in"}
         </button>
-
       </form>
 
-      {/* Divider */}
       <div className="my-6 flex items-center gap-3">
         <div className="flex-1 h-px bg-gray-200" />
         <span className="text-sm text-gray-400">or</span>
         <div className="flex-1 h-px bg-gray-200" />
       </div>
 
-      {/* Google Button */}
       <button
         onClick={handleGoogleLogin}
         className="w-full py-2.5 border border-gray-300 rounded-lg font-medium text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-3"
@@ -146,7 +141,6 @@ const handleGoogleLogin = async () => {
         Continue with Google
       </button>
 
-      {/* Signup Link */}
       <p className="mt-6 text-center text-sm text-gray-500">
         Don't have an account?{" "}
         <Link href="/signup" className="text-blue-600 font-medium hover:underline">
@@ -155,5 +149,17 @@ const handleGoogleLogin = async () => {
       </p>
 
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 p-8 flex items-center justify-center">
+        <span className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }
