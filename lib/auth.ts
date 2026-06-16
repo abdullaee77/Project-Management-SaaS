@@ -16,6 +16,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      checks: ["state"],
     }),
     Credentials({
       name: "credentials",
@@ -28,7 +29,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           throw new Error("Email and password required")
         }
 
-        // Find user in database
         const result = await db.query(
           "SELECT * FROM users WHERE email = $1",
           [credentials.email]
@@ -44,7 +44,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           throw new Error("Please login with Google")
         }
 
-        // Check password
         const isValid = await bcrypt.compare(
           credentials.password as string,
           user.password
@@ -68,36 +67,35 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
- async signIn({ user, account }) {
-  if (account?.provider === "google") {
-    try {
-      console.log("Google signIn attempt for:", user.email)
-      
-      const existing = await db.query(
-        "SELECT * FROM users WHERE email = $1",
-        [user.email]
-      )
-      console.log("Existing user found:", existing.rows.length)
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        try {
+          console.log("Google signIn attempt for:", user.email)
 
-      if (existing.rows.length === 0) {
-        const id = uuidv4()
-        await db.query(
-          `INSERT INTO users (id, name, email, avatar, is_verified)
-           VALUES ($1, $2, $3, $4, $5)`,
-          [id, user.name, user.email, user.image, true]
-        )
-        console.log("New user created")
+          const existing = await db.query(
+            "SELECT * FROM users WHERE email = $1",
+            [user.email]
+          )
+          console.log("Existing user found:", existing.rows.length)
+
+          if (existing.rows.length === 0) {
+            const id = uuidv4()
+            await db.query(
+              `INSERT INTO users (id, name, email, avatar, is_verified)
+               VALUES ($1, $2, $3, $4, $5)`,
+              [id, user.name, user.email, user.image, true]
+            )
+            console.log("New user created")
+          }
+        } catch (error) {
+          console.error("signIn error:", error)
+          return false
+        }
       }
-    } catch (error) {
-      console.error("signIn error:", error)
-      return false
-    }
-  }
-  return true
-},
+      return true
+    },
     async jwt({ token, user }) {
       if (user) {
-        // Get user from database to get our own id
         const result = await db.query(
           "SELECT * FROM users WHERE email = $1",
           [token.email]
