@@ -47,10 +47,12 @@ export default async function ProjectPage({
 
   return (
     <KanbanBoard
+    
       projectId={projectId}
       initialTasks={tasksResult.rows}
       members={membersResult.rows}
       canEdit={canCreateProject(myRole)}
+      currentUserId={session.user.id}
     />
   )
 }

@@ -88,7 +88,7 @@ export async function POST(
        VALUES ($1, $2, $3, $4, $5, $6, 'pending', $7)`,
       [invitationId, workspaceId, session.user.id, email, role, token, expiresAt]
     )
-
+console.log("DEBUG workspaceName:", workspaceName)
     // Step 7 — Send email
     await sendInviteEmail(email, workspaceName, token, role)
 

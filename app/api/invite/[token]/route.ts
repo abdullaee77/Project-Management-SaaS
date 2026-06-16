@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { auth } from "@/lib/auth"
 import { v4 as uuidv4 } from "uuid"
-
+import { createNotification } from "@/lib/notifications"
 // ============================================
 // GET — Check if an invitation is valid
 // ============================================
@@ -111,6 +111,15 @@ export async function POST(
       `UPDATE invitations SET status = 'accepted' WHERE id = $1`,
       [invite.id]
     )
+    // Notify the person who sent the invite
+    await createNotification({
+      userId: invite.invited_by,
+      workspaceId: invite.workspace_id,
+      title: "New team member",
+      message: `${session.user.name} accepted your invitation and joined the workspace`,
+      type: "invite_accepted",
+      link: `/workspace/${invite.workspace_id}/members`,
+    })
 
     return NextResponse.json({
       message: "You've joined the workspace",

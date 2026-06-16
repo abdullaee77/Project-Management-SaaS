@@ -4,6 +4,7 @@ import { useState } from "react"
 import Modal from "@/components/shared/Modal"
 import TaskComments from "./TaskComments"
 import TaskActivity from "./TaskActivity"
+import TaskAttachments from "./TaskAttachments"
 
 interface Task {
   id: string
@@ -26,15 +27,16 @@ interface TaskModalProps {
   task: Task
   members: Member[]
   canEdit: boolean
+  currentUserId: string
   onClose: () => void
   onUpdate: (taskId: string, fields: Partial<Task> & { assigneeId?: string | null; dueDate?: string | null }) => void
   onDelete: (taskId: string) => void
 }
 
-export default function TaskModal({ task, members, canEdit, onClose, onUpdate, onDelete }: TaskModalProps) {
+export default function TaskModal({ task, members, canEdit, currentUserId, onClose, onUpdate, onDelete }: TaskModalProps) {
   const [title, setTitle] = useState(task.title)
   const [description, setDescription] = useState(task.description || "")
-  const [activeTab, setActiveTab] = useState<"comments" | "activity">("comments")
+  const [activeTab, setActiveTab] = useState<"comments" | "activity" | "files">("comments")
   const [activityKey, setActivityKey] = useState(0)
   const [deleting, setDeleting] = useState(false)
 
@@ -181,7 +183,7 @@ export default function TaskModal({ task, members, canEdit, onClose, onUpdate, o
             <label className="block text-xs font-medium text-gray-500 mb-1">Due date</label>
             <input
               type="date"
-value={task.due_date ? new Date(task.due_date).toISOString().split("T")[0] : ""}
+              value={task.due_date ? new Date(task.due_date).toISOString().split("T")[0] : ""}
               onChange={(e) => handleDueDateChange(e.target.value)}
               disabled={!canEdit}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-gray-50"
@@ -208,13 +210,21 @@ value={task.due_date ? new Date(task.due_date).toISOString().split("T")[0] : ""}
             >
               Activity
             </button>
+            <button
+              onClick={() => setActiveTab("files")}
+              className={`pb-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "files" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-400 hover:text-gray-600"
+              }`}
+            >
+              Files
+            </button>
           </div>
 
           <div className="pt-3">
-            {activeTab === "comments" ? (
-              <TaskComments taskId={task.id} />
-            ) : (
-              <TaskActivity taskId={task.id} refreshKey={activityKey} />
+            {activeTab === "comments" && <TaskComments taskId={task.id} />}
+            {activeTab === "activity" && <TaskActivity taskId={task.id} refreshKey={activityKey} />}
+            {activeTab === "files" && (
+              <TaskAttachments taskId={task.id} currentUserId={currentUserId} canEdit={canEdit} />
             )}
           </div>
         </div>

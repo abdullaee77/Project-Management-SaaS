@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { auth } from "@/lib/auth"
 import { getMemberRole } from "@/lib/workspace"
+import { createNotification } from "@/lib/notifications"
 import { v4 as uuidv4 } from "uuid"
 
 export async function GET(
@@ -60,12 +61,13 @@ export async function POST(
       return NextResponse.json({ error: "Comment cannot be empty" }, { status: 400 })
     }
 
-    const taskResult = await db.query(`SELECT workspace_id FROM tasks WHERE id = $1`, [taskId])
+    const taskResult = await db.query(`SELECT * FROM tasks WHERE id = $1`, [taskId])
     if (taskResult.rows.length === 0) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 })
     }
+    const task = taskResult.rows[0]
 
-    const myRole = await getMemberRole(taskResult.rows[0].workspace_id, session.user.id)
+    const myRole = await getMemberRole(task.workspace_id, session.user.id)
     if (!myRole) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
     }
@@ -76,6 +78,22 @@ export async function POST(
        VALUES ($1, $2, $3, $4)`,
       [commentId, taskId, session.user.id, content.trim()]
     )
+
+    // Notify the task's assignee and creator (but not the commenter)
+    const notifyUserIds = new Set<string>()
+    if (task.assignee_id && task.assignee_id !== session.user.id) notifyUserIds.add(task.assignee_id)
+    if (task.created_by && task.created_by !== session.user.id) notifyUserIds.add(task.created_by)
+
+    for (const uid of notifyUserIds) {
+      await createNotification({
+        userId: uid,
+        workspaceId: task.workspace_id,
+        title: "New comment",
+        message: `${session.user.name} commented on "${task.title}"`,
+        type: "task_comment",
+        link: `/projects/${task.project_id}`,
+      })
+    }
 
     return NextResponse.json(
       {

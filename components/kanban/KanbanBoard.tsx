@@ -48,11 +48,13 @@ export default function KanbanBoard({
   initialTasks,
   members,
   canEdit,
+   currentUserId,
 }: {
   projectId: string
   initialTasks: Task[]
   members: Member[]
   canEdit: boolean
+  currentUserId: string
 }) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks)
   const [activeTask, setActiveTask] = useState<Task | null>(null)
@@ -202,6 +204,7 @@ const getColumnTasks = (status: string) => {
           task={selectedTask}
           members={members}
           canEdit={canEdit}
+          currentUserId={currentUserId}
           onClose={() => setSelectedTaskId(null)}
           onUpdate={handleTaskUpdate}
           onDelete={handleTaskDelete}

@@ -50,14 +50,14 @@ export async function sendWelcomeEmail(email: string, name: string) {
   })
 }
 
+
 export async function sendInviteEmail(
   email: string,
   workspaceName: string,
   token: string,
   role: string
 ) {
-  const inviteUrl = `${APP_URL}/invite?token=${token}`
-
+const inviteUrl = `${APP_URL}/invite/${token}`
   await resend.emails.send({
     from: FROM,
     to: email,

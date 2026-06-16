@@ -3,6 +3,7 @@ import { db } from "@/lib/db"
 import { auth } from "@/lib/auth"
 import { getMemberRole, canCreateProject } from "@/lib/workspace"
 import { logTaskActivity } from "@/lib/activity"
+import { createNotification } from "@/lib/notifications"
 
 const PRIORITY_LABELS: Record<string, string> = {
   low: "Low", medium: "Medium", high: "High", urgent: "Urgent",
@@ -101,6 +102,18 @@ export async function PATCH(
       }
 
       await logTaskActivity(taskId, userId, "changed assignee", oldName, newName)
+
+      // Notify the newly assigned user
+      if (body.assigneeId && body.assigneeId !== userId) {
+        await createNotification({
+          userId: body.assigneeId,
+          workspaceId: oldTask.workspace_id,
+          title: "New task assigned",
+          message: `You were assigned to "${oldTask.title}"`,
+          type: "task_assigned",
+          link: `/projects/${oldTask.project_id}`,
+        })
+      }
     }
 
     if (body.description !== undefined && (body.description?.trim() || null) !== oldTask.description) {
