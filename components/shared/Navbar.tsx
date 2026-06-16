@@ -9,7 +9,12 @@ export default function Navbar({ userName }: { userName?: string | null }) {
       </Link>
       <div className="flex items-center gap-4">
         <NotificationBell />
-        <span className="text-sm text-gray-600 hidden sm:inline">{userName}</span>
+        <Link
+          href="/settings"
+          className="text-sm text-gray-600 hover:text-gray-900 hidden sm:inline"
+        >
+          {userName}
+        </Link>
         <Link href="/api/auth/signout" className="text-sm text-gray-400 hover:text-gray-600">
           Sign out
         </Link>

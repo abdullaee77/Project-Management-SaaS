@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth"
 import { getMemberRole, canManageWorkspace } from "@/lib/workspace"
 import { sendInviteEmail } from "@/lib/utils"
 import { v4 as uuidv4 } from "uuid"
+import { checkMemberLimit } from "@/lib/plans"
 
 // ============================================
 // POST — Send an invitation
@@ -38,6 +39,17 @@ export async function POST(
     if (!canManageWorkspace(myRole)) {
       return NextResponse.json(
         { error: "You don't have permission to invite members" },
+        { status: 403 }
+      )
+    }
+    // Check plan limits
+    const withinLimit = await checkMemberLimit(workspaceId)
+    if (!withinLimit) {
+      return NextResponse.json(
+        {
+          error: "You have reached the member limit for the Free plan. Upgrade to Pro for unlimited members.",
+          code: "LIMIT_REACHED",
+        },
         { status: 403 }
       )
     }

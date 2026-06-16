@@ -3,7 +3,7 @@ import { db } from "@/lib/db"
 import { auth } from "@/lib/auth"
 import { getMemberRole, canCreateProject } from "@/lib/workspace"
 import { v4 as uuidv4 } from "uuid"
-
+import { checkProjectLimit } from "@/lib/plans"
 // ============================================
 // POST — Create a new project
 // ============================================
@@ -28,6 +28,17 @@ export async function POST(req: NextRequest) {
     if (!canCreateProject(myRole)) {
       return NextResponse.json(
         { error: "You don't have permission to create projects" },
+        { status: 403 }
+      )
+    }
+    // Check plan limits
+    const withinLimit = await checkProjectLimit(workspaceId)
+    if (!withinLimit) {
+      return NextResponse.json(
+        {
+          error: "You have reached the project limit for the Free plan. Upgrade to Pro for unlimited projects.",
+          code: "LIMIT_REACHED",
+        },
         { status: 403 }
       )
     }

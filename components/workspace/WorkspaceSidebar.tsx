@@ -10,9 +10,10 @@ interface WorkspaceSidebarProps {
 export default function WorkspaceSidebar({ workspace }: WorkspaceSidebarProps) {
   const pathname = usePathname()
 
-  const links = [
+const links = [
     { href: `/workspace/${workspace.id}`, label: "Overview" },
     { href: `/workspace/${workspace.id}/members`, label: "Members" },
+    { href: `/workspace/${workspace.id}/billing`, label: "Billing" },
   ]
 
   return (
