@@ -68,31 +68,33 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ user, account }) {
-      // Handle Google OAuth
-      if (account?.provider === "google") {
-        try {
-          // Check if user already exists
-          const existing = await db.query(
-            "SELECT * FROM users WHERE email = $1",
-            [user.email]
-          )
+ async signIn({ user, account }) {
+  if (account?.provider === "google") {
+    try {
+      console.log("Google signIn attempt for:", user.email)
+      
+      const existing = await db.query(
+        "SELECT * FROM users WHERE email = $1",
+        [user.email]
+      )
+      console.log("Existing user found:", existing.rows.length)
 
-          if (existing.rows.length === 0) {
-            // Create new user from Google
-            const id = uuidv4()
-            await db.query(
-              `INSERT INTO users (id, name, email, avatar, is_verified)
-               VALUES ($1, $2, $3, $4, $5)`,
-              [id, user.name, user.email, user.image, true]
-            )
-          }
-        } catch (error) {
-          return false
-        }
+      if (existing.rows.length === 0) {
+        const id = uuidv4()
+        await db.query(
+          `INSERT INTO users (id, name, email, avatar, is_verified)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [id, user.name, user.email, user.image, true]
+        )
+        console.log("New user created")
       }
-      return true
-    },
+    } catch (error) {
+      console.error("signIn error:", error)
+      return false
+    }
+  }
+  return true
+},
     async jwt({ token, user }) {
       if (user) {
         // Get user from database to get our own id
