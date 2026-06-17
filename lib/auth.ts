@@ -95,7 +95,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true
     },
     async jwt({ token, user }) {
-      if (user) {
+      if (token.email) {
         const result = await db.query(
           "SELECT * FROM users WHERE email = $1",
           [token.email]
@@ -117,8 +117,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return session
     },
-   async redirect() {
-  return "/dashboard"
-}
+    async redirect() {
+      return "/dashboard"
+    }
   },
 })
