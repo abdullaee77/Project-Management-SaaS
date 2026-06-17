@@ -57,11 +57,19 @@ export async function sendInviteEmail(
   token: string,
   role: string
 ) {
-const inviteUrl = `${APP_URL}/invite/${token}`
-  await resend.emails.send({
+  const inviteUrl = `${APP_URL}/invite/${token}`
+  
+  console.log("Sending invite email:")
+  console.log("FROM:", FROM)
+  console.log("TO:", email)
+  console.log("RESEND_API_KEY exists:", !!process.env.RESEND_API_KEY)
+
+  const result = await resend.emails.send({
     from: FROM,
     to: email,
     subject: `You've been invited to join ${workspaceName} on Taskly`,
     react: InviteEmail({ workspaceName, inviteUrl, role }),
   })
+
+  console.log("Invite email result:", JSON.stringify(result))
 }
