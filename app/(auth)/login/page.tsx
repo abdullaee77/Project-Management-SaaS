@@ -34,14 +34,18 @@ function LoginForm() {
         redirect: false,
       })
 
-      if (result?.error) {
-        if (result.error === "CredentialsSignin") {
-          setError("Invalid email or password. If you just signed up, please verify your email first.")
-        } else {
-          setError(result.error)
-        }
-        return
-      }
+  if (result?.error === "CredentialsSignin") {
+  // Check the actual error from the URL
+  const url = new URL(window.location.href)
+  const errorParam = url.searchParams.get("error")
+  
+  if (errorParam === "NOT_VERIFIED") {
+    setError("Please verify your email first. Check your inbox for the verification link.")
+  } else {
+    setError("Invalid email or password.")
+  }
+  return
+}
 
       router.push(callbackUrl)
       router.refresh()
