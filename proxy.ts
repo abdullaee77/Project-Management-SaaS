@@ -5,6 +5,9 @@ export async function proxy(req: NextRequest) {
   const token = await getToken({
     req,
     secret: process.env.AUTH_SECRET,
+    cookieName: process.env.NODE_ENV === "production"
+      ? "__Secure-authjs.session-token"
+      : "authjs.session-token",
   })
 
   const isLoggedIn = !!token
@@ -20,7 +23,8 @@ export async function proxy(req: NextRequest) {
     req.nextUrl.pathname.startsWith("/dashboard") ||
     req.nextUrl.pathname.startsWith("/workspace") ||
     req.nextUrl.pathname.startsWith("/projects") ||
-    req.nextUrl.pathname.startsWith("/settings")
+    req.nextUrl.pathname.startsWith("/settings") ||
+    req.nextUrl.pathname.startsWith("/invite")
 
   if (isDashboardPage && !isLoggedIn) {
     return NextResponse.redirect(new URL("/login", req.nextUrl))
