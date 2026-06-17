@@ -1,13 +1,11 @@
 'use client'
 
-import { Suspense } from "react"
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { signIn } from "next-auth/react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 
 function LoginForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
 
@@ -34,25 +32,32 @@ function LoginForm() {
         redirect: false,
       })
 
-  if (result?.error === "CredentialsSignin") {
-  // Check the actual error from the URL
-  const url = new URL(window.location.href)
-  const errorParam = url.searchParams.get("error")
-  
-  if (errorParam === "NOT_VERIFIED") {
-    setError("Please verify your email first. Check your inbox for the verification link.")
-  } else {
-    setError("Invalid email or password.")
-  }
-  return
-}
+      if (result?.error) {
+        switch (result.error) {
+          case "NO_ACCOUNT":
+            setError("No account found with this email. Please sign up first.")
+            break
+          case "WRONG_PASSWORD":
+            setError("Incorrect password. Please try again.")
+            break
+          case "NOT_VERIFIED":
+            setError("Please verify your email first. Check your inbox for the verification link.")
+            break
+          case "USE_GOOGLE":
+            setError("This email is registered with Google. Please use the Google login button.")
+            break
+          default:
+            setError("Invalid email or password. Please try again.")
+        }
+        setLoading(false)
+        return
+      }
 
-      router.push(callbackUrl)
-      router.refresh()
+      // Hard redirect — forces browser to re-read session cookie
+      window.location.href = callbackUrl
 
     } catch (err) {
       setError("Something went wrong. Please try again.")
-    } finally {
       setLoading(false)
     }
   }
