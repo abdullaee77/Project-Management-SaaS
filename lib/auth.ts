@@ -94,29 +94,33 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return true
     },
-    async jwt({ token, user }) {
-      if (token.email) {
-        const result = await db.query(
-          "SELECT * FROM users WHERE email = $1",
-          [token.email]
-        )
-        const dbUser = result.rows[0]
-        if (dbUser) {
-          token.id = dbUser.id
-          token.name = dbUser.name
-          token.image = dbUser.avatar
-        }
-      }
-      return token
-    },
-    async session({ session, token }) {
-      if (token) {
-        session.user.id = token.id as string
-        session.user.name = token.name
-        session.user.image = token.image as string
-      }
-      return session
-    },
+async jwt({ token, user }) {
+  console.log("JWT callback - token.email:", token.email)
+  if (token.email) {
+    const result = await db.query(
+      "SELECT * FROM users WHERE email = $1",
+      [token.email]
+    )
+    const dbUser = result.rows[0]
+    console.log("JWT callback - dbUser found:", !!dbUser, "id:", dbUser?.id)
+    if (dbUser) {
+      token.id = dbUser.id
+      token.name = dbUser.name
+      token.image = dbUser.avatar
+    }
+  }
+  return token
+},
+async session({ session, token }) {
+  console.log("Session callback - token.id:", token.id)
+  if (token) {
+    session.user.id = token.id as string
+    session.user.name = token.name
+    session.user.image = token.image as string
+  }
+  console.log("Session callback - session.user.id:", session.user.id)
+  return session
+},
     async redirect() {
       return "/dashboard"
     }
